@@ -1,0 +1,14 @@
+# ======================================================================
+# terraform.tfvars — Networks Stage
+# ======================================================================
+#
+# Copy to terraform.tfvars and fill in your values.
+#
+# ======================================================================
+
+organization_id    = "310558825488"
+billing_account_id = "019ED6-BEBD8C-EA1EB9"
+
+state_bucket_name = "terraform-state-asliadarsh-18792"
+
+region = "asia-south1"
