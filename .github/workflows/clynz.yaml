@@ -10,10 +10,7 @@ on:
     paths:
       - 'Deployment/Spoke/Clynz/**'
       - 'Workload/Spoke/Clynz/**'
-      - 'Modules/service-project/**'
-      - 'Modules/compute-vm/**'
-      - 'Modules/cloud-sql/**'
-      - 'Modules/storage-bucket/**'
+      - 'Modules/**'
 
 jobs:
   deploy:

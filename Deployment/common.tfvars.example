@@ -5,7 +5,7 @@
 # In CI/CD, these values come from GitHub Secrets as -var flags.
 # ======================================================================
 
-organization_id    = "310558825488"
-billing_account_id = "019ED6-BEBD8C-EA1EB9"
-state_bucket_name  = "terraform-state-asliadarsh-18792"
+organization_id    = "your-organization_id"
+billing_account_id = "your-billing_account_id"
+state_bucket_name  = "tfstate-file-bucket-name"
 region             = "asia-south1"
