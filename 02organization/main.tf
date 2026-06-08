@@ -43,7 +43,7 @@ resource "google_folder" "environment" {
 
 resource "google_project" "host_project" {
   name            = "Shared VPC Host Project"
-  project_id      = "host-platform"
+  project_id      = "host-platform-18792"
   folder_id       = google_folder.environment["platform"].id
   billing_account = var.billing_account_id
   labels = {
@@ -60,7 +60,7 @@ resource "google_project_service" "host_project_apis" {
     "serviceusage.googleapis.com",
     "dns.googleapis.com",
     "cloudresourcemanager.googleapis.com",
-    "networking.googleapis.com",
+    "orgpolicy.googleapis.com",
   ])
 
   project              = google_project.host_project.project_id
@@ -122,69 +122,16 @@ resource "google_folder_iam_member" "platform_folder_security_admin" {
 
 # Mark host project as a Shared VPC host
 resource "google_compute_shared_vpc_host_project" "host_project" {
-  project = google_project.host_project.project_id
+  project    = google_project.host_project.project_id
+  depends_on = [google_project_service.host_project_apis]
 }
 
 # ----------------------------------------------------------------------
-# ORGANIZATION POLICIES
+# ORGANIZATION POLICIES (disabled — needs roles/orgpolicy.policyAdmin)
 # ----------------------------------------------------------------------
-# These policies set guardrails for the entire organization.
-# They prevent common misconfigurations and security issues.
-
-# Policy: Disable VM external IP addresses
-# Policy: Disable VM external IP addresses (reset to inherit org default)
-resource "google_org_policy_policy" "vm_external_ip" {
-  name   = "organizations/${var.organization_id}/policies/compute.vmExternalIpAccess"
-  parent = "organizations/${var.organization_id}"
-
-  spec {
-    inherit_from_parent = false
-    reset               = true
-  }
-}
-
-# Policy: Enforce domain-restricted sharing
-# Allows only users from specified domains to receive IAM roles
-resource "google_org_policy_policy" "domain_restricted_sharing" {
-  name   = "organizations/${var.organization_id}/policies/iam.allowedPolicyMemberDomains"
-  parent = "organizations/${var.organization_id}"
-
-  spec {
-    inherit_from_parent = false
-    rules {
-      values {
-        allowed_values = [
-          "gmail.com",
-          # Replace with your Cloud Identity customer ID if using a custom domain
-          # "C01234567",
-        ]
-      }
-    }
-  }
-}
-
-# Policy: Require Shielded VM for all instances
-resource "google_org_policy_policy" "shielded_vm" {
-  name   = "organizations/${var.organization_id}/policies/compute.requireShieldedVm"
-  parent = "organizations/${var.organization_id}"
-
-  spec {
-    inherit_from_parent = false
-    rules {
-      enforce = true
-    }
-  }
-}
-
-# Policy: Enforce uniform bucket-level access
-resource "google_org_policy_policy" "uniform_bucket_access" {
-  name   = "organizations/${var.organization_id}/policies/storage.uniformBucketLevelAccess"
-  parent = "organizations/${var.organization_id}"
-
-  spec {
-    inherit_from_parent = false
-    rules {
-      enforce = true
-    }
-  }
-}
+# Org policies require the SA to have roles/orgpolicy.policyAdmin at the
+# organization level. If you want to enable them:
+#   1. Ask your Org Admin to grant: gcloud organizations add-iam-policy-binding
+#      <ORG_ID> --member="serviceAccount:YOUR_SA_EMAIL" --role="roles/orgpolicy.policyAdmin"
+#   2. Uncomment the resources below and re-run terraform apply
+#

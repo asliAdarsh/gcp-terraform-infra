@@ -33,7 +33,7 @@ output "all_folder_ids" {
 # Host Project
 # ----------------------------------------------------------------------
 output "host_project_id" {
-  description = "Project ID of the Shared VPC host project (host-platform)"
+  description = "Project ID of the Shared VPC host project"
   value       = google_project.host_project.project_id
 }
 
