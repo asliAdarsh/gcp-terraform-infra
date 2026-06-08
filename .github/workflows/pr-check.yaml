@@ -1,8 +1,5 @@
 # ======================================================================
-# PR Check Workflow
-# ======================================================================
-# Runs on PRs to validate Terraform formatting and syntax for any
-# changed Workload/ or Deployment/ files.
+# PR Check — validates all changed Terraform files
 # ======================================================================
 
 name: PR Check
@@ -18,30 +15,22 @@ on:
 permissions:
   id-token: write
   contents: read
-  pull-requests: write
 
 jobs:
-  terraform-check:
+  validate:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-      - uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.0
           terraform_wrapper: false
 
-      # Format check across all Terraform files
       - name: Terraform Format
         run: terraform fmt -check -recursive
         continue-on-error: true
 
-      # Validate each Workload module that was changed
-      - name: Terraform Validate
+      - name: Validate changed modules
         run: |
           for dir in $(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^Workload/' | cut -d/ -f1-3 | sort -u); do
             if [ -f "$dir/main.tf" ]; then

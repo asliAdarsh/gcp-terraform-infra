@@ -5,6 +5,15 @@
 name: Deploy Totes
 
 on:
+  pull_request:
+    branches: [dev, staging, prod]
+    paths:
+      - 'Deployment/Spoke/Totes/**'
+      - 'Workload/Spoke/Totes/**'
+      - 'Modules/service-project/**'
+      - 'Modules/compute-vm/**'
+      - 'Modules/cloud-sql/**'
+      - 'Modules/storage-bucket/**'
   push:
     branches: [dev, staging, prod]
     paths:
@@ -15,10 +24,15 @@ on:
       - 'Modules/cloud-sql/**'
       - 'Modules/storage-bucket/**'
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy:
     uses: ./.github/workflows/deploy-app.yaml
     with:
       workload-path: Spoke/Totes
-      environment: ${{ github.ref_name }}
+      environment: ${{ github.event_name == 'pull_request' && github.base_ref || github.ref_name }}
+      run-apply: ${{ github.event_name == 'push' }}
     secrets: inherit
