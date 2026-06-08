@@ -1,0 +1,68 @@
+# ======================================================================
+# Reusable Deploy App Workflow
+# ======================================================================
+# Called by per-app workflow files. Handles init → validate → plan → apply.
+# ======================================================================
+
+name: Deploy App
+
+on:
+  workflow_call:
+    inputs:
+      app-name:
+        description: "App directory name (e.g. backend-api)"
+        required: true
+        type: string
+      environment:
+        description: "Target environment (dev, staging, prod)"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      - name: Terraform Init
+        run: |
+          cd apps/${{ inputs.app-name }}
+          terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+
+      - name: Terraform Validate
+        run: |
+          cd apps/${{ inputs.app-name }}
+          terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd apps/${{ inputs.app-name }}
+          terraform plan \
+            -var-file=${{ inputs.environment }}.tfvars \
+            -no-color \
+            -out=tfplan
+
+      - name: Terraform Apply
+        run: |
+          cd apps/${{ inputs.app-name }}
+          terraform apply -auto-approve tfplan

@@ -1,0 +1,21 @@
+# ======================================================================
+# data-pipeline Pipeline
+# ======================================================================
+
+name: Deploy data-pipeline
+
+on:
+  push:
+    branches: [dev, staging, prod]
+    paths:
+      - 'apps/data-pipeline/**'
+      - 'Modules/service-project/**'
+      - 'Modules/storage-bucket/**'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-app.yaml
+    with:
+      app-name: data-pipeline
+      environment: ${{ github.ref_name }}
+    secrets: inherit

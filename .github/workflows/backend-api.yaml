@@ -1,0 +1,26 @@
+# ======================================================================
+# backend-api Pipeline
+# ======================================================================
+# Triggered when backend-api or shared module code changes.
+# Deploys to dev on push to dev, prod on push to prod.
+# ======================================================================
+
+name: Deploy backend-api
+
+on:
+  push:
+    branches: [dev, staging, prod]
+    paths:
+      - 'apps/backend-api/**'
+      - 'Modules/service-project/**'
+      - 'Modules/compute-vm/**'
+      - 'Modules/cloud-sql/**'
+      - 'Modules/storage-bucket/**'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-app.yaml
+    with:
+      app-name: backend-api
+      environment: ${{ github.ref_name }}
+    secrets: inherit
