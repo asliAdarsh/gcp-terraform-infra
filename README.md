@@ -1,0 +1,1 @@
+ It's a simplified version of Google's [terraform-example-foundation](https://github.com/terraform-google-modules/terraform-example-foundation) patterns, trimmed to what a team actually needs to get a Hub-and-Spoke network running with CI/CD (GitHub Actions via Workload Identity Federation).
