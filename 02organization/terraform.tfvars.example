@@ -1,0 +1,20 @@
+# ======================================================================
+# terraform.tfvars — Organization Stage
+# ======================================================================
+#
+# Copy to terraform.tfvars and fill in your values.
+# terraform.tfvars is in .gitignore — it will NOT be committed.
+#
+# STEP 1: Get values from bootstrap outputs:
+#   state_bucket_name       → from bootstrap output
+#   terraform_org_sa_email  → from bootstrap output
+#
+# ======================================================================
+
+organization_id    = "REPLACE_WITH_YOUR_ORG_ID"
+billing_account_id = "REPLACE_WITH_YOUR_BILLING_ACCOUNT_ID"
+
+state_bucket_name      = "terraform-state-asliadarsh-18792"
+terraform_org_sa_email = "terraform-org@bootstrap-infra-state.iam.gserviceaccount.com"
+
+region = "asia-south1"
