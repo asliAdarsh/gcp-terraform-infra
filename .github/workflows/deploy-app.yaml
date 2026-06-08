@@ -9,6 +9,13 @@
 #         workload-path: Spoke/Clynz
 #         environment: dev
 #       secrets: inherit
+#
+# Required Secrets:
+#   WIF_PROVIDER         — Workload Identity Federation provider
+#   WIF_SERVICE_ACCOUNT  — Service account to impersonate
+#   TF_STATE_BUCKET      — GCS bucket for Terraform state
+#   ORG_ID               — GCP Organization ID (numeric)
+#   BILLING_ACCOUNT      — GCP Billing Account ID
 # ======================================================================
 
 name: Deploy App
@@ -64,7 +71,10 @@ jobs:
         run: |
           cd Workload/${{ inputs.workload-path }}
           terraform plan \
-            -var-file=../../Deployment/common.tfvars \
+            -var="organization_id=${{ secrets.ORG_ID }}" \
+            -var="billing_account_id=${{ secrets.BILLING_ACCOUNT }}" \
+            -var="state_bucket_name=${{ secrets.TF_STATE_BUCKET }}" \
+            -var="region=asia-south1" \
             -var-file=../../Deployment/${{ inputs.workload-path }}/${{ inputs.environment }}.tfvars \
             -no-color \
             -out=tfplan

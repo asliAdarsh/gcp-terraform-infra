@@ -1,5 +1,4 @@
 # Clynz Team — Development
-# Usage: terraform apply -var-file=../../../Deployment/common.tfvars -var-file=dev.tfvars
 
 team_name          = "Clynz"
 project_component  = "backend"

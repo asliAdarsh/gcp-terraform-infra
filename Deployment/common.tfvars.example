@@ -1,11 +1,8 @@
 # ======================================================================
-# Common Configuration — shared across all teams and environments
+# Common Configuration — REFERENCE ONLY
 # ======================================================================
-# Include this file first in every terraform plan/apply command:
-#
-#   terraform plan -var-file=../../Deployment/common.tfvars \
-#                  -var-file=../../Deployment/Spore/<team>/<env>.tfvars
-#
+# Copy this to common.tfvars (gitignored) for local development.
+# In CI/CD, these values come from GitHub Secrets as -var flags.
 # ======================================================================
 
 organization_id    = "310558825488"
