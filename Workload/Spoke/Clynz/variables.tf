@@ -30,6 +30,11 @@ variable "state_bucket_name" {
   type        = string
 }
 
+variable "organization_id" {
+  description = "GCP Organization ID"
+  type        = string
+}
+
 variable "region" {
   description = "Default region"
   type        = string
