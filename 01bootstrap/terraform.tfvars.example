@@ -1,0 +1,30 @@
+# ======================================================================
+# terraform.tfvars — Bootstrap Stage
+# ======================================================================
+#
+# Copy this file to terraform.tfvars and fill in your actual values.
+# terraform.tfvars is in .gitignore — it will NOT be committed.
+#
+# === STEP 1: Get your values ===
+#   organization_id    → gcloud organizations list
+#   billing_account_id → gcloud billing accounts list
+#
+# === STEP 2: Create unique bucket name ===
+#   Pick something like: terraform-state-asliadarsh-9x4k
+#   Must be globally unique across ALL GCP buckets.
+#
+# === STEP 3: Fill in GitHub info ===
+#   github_organization = "asliAdarsh"       # your GitHub username
+#   github_repository  = "gcp-terraform-infra"   # your repo name
+#
+# ======================================================================
+
+organization_id    = "REPLACE_WITH_YOUR_ORG_ID"
+billing_account_id = "REPLACE_WITH_YOUR_BILLING_ACCOUNT_ID"
+
+state_bucket_name = "terraform-state-asliadarsh"  # CHANGE: add random suffix for uniqueness
+
+github_organization = "asliAdarsh"
+github_repository   = "gcp-terraform-infra"
+
+region = "asia-south1"

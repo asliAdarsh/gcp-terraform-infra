@@ -1,0 +1,20 @@
+# ======================================================================
+# Core Pipeline — manages team folders under environment folders
+# ======================================================================
+
+name: Deploy Core
+
+on:
+  push:
+    branches: [dev, staging, prod]
+    paths:
+      - 'Deployment/Core/**'
+      - 'Workload/Core/**'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-app.yaml
+    with:
+      workload-path: Core
+      environment: ${{ github.ref_name }}
+    secrets: inherit

@@ -1,0 +1,28 @@
+# ======================================================================
+# Gitleaks Configuration
+# ======================================================================
+# Scans for secrets and sensitive data in git history.
+# Run: gitleaks detect --source . --verbose
+# ======================================================================
+
+[allowlist]
+  description = "Allowlist for false positives specific to this repo"
+
+  # Terraform example values (placeholders, not real secrets)
+  regexes = [
+    '''REPLACE_WITH_.*''',
+    '''YOUR_.*''',
+    '''PLACEHOLDER.*''',
+  ]
+
+  # Example service account email in tfvars
+  paths = [
+    '''.*\.tfvars\.example''',
+    '''.*/terraform\.tfvars\.example''',
+  ]
+
+  # Git ignored files
+  regexes = [
+    '''\.terraform/''',
+    '''\.tfstate''',
+  ]

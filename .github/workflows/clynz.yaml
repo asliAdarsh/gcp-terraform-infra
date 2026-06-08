@@ -1,0 +1,24 @@
+# ======================================================================
+# Clynz Team Pipeline
+# ======================================================================
+
+name: Deploy Clynz
+
+on:
+  push:
+    branches: [dev, staging, prod]
+    paths:
+      - 'Deployment/Spoke/Clynz/**'
+      - 'Workload/Spoke/Clynz/**'
+      - 'Modules/service-project/**'
+      - 'Modules/compute-vm/**'
+      - 'Modules/cloud-sql/**'
+      - 'Modules/storage-bucket/**'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-app.yaml
+    with:
+      workload-path: Spoke/Clynz
+      environment: ${{ github.ref_name }}
+    secrets: inherit

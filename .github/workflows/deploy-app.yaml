@@ -1,0 +1,85 @@
+# ======================================================================
+# Reusable Deploy App Workflow
+# ======================================================================
+# Usage:
+#   jobs:
+#     deploy:
+#       uses: ./.github/workflows/deploy-app.yaml
+#       with:
+#         workload-path: Spoke/Clynz
+#         environment: dev
+#       secrets: inherit
+#
+# Required Secrets:
+#   WIF_PROVIDER         — Workload Identity Federation provider
+#   WIF_SERVICE_ACCOUNT  — Service account to impersonate
+#   TF_STATE_BUCKET      — GCS bucket for Terraform state
+#   ORG_ID               — GCP Organization ID (numeric)
+#   BILLING_ACCOUNT      — GCP Billing Account ID
+# ======================================================================
+
+name: Deploy App
+
+on:
+  workflow_call:
+    inputs:
+      workload-path:
+        description: "Path under Workload/ (e.g. Core, Spoke/Clynz)"
+        required: true
+        type: string
+      environment:
+        description: "Target environment (dev, staging, prod)"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      - name: Terraform Init
+        run: |
+          cd Workload/${{ inputs.workload-path }}
+          terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+
+      - name: Terraform Validate
+        run: |
+          cd Workload/${{ inputs.workload-path }}
+          terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd Workload/${{ inputs.workload-path }}
+          terraform plan \
+            -var="organization_id=${{ secrets.ORG_ID }}" \
+            -var="billing_account_id=${{ secrets.BILLING_ACCOUNT }}" \
+            -var="state_bucket_name=${{ secrets.TF_STATE_BUCKET }}" \
+            -var="region=asia-south1" \
+            -var-file=../../Deployment/${{ inputs.workload-path }}/${{ inputs.environment }}.tfvars \
+            -no-color \
+            -out=tfplan
+
+      - name: Terraform Apply
+        run: |
+          cd Workload/${{ inputs.workload-path }}
+          terraform apply -auto-approve tfplan

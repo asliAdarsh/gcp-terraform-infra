@@ -1,0 +1,15 @@
+# ======================================================================
+# terraform.tfvars — Networks Stage
+# ======================================================================
+#
+# Copy to terraform.tfvars and fill in your values.
+#
+# ======================================================================
+
+organization_id    = "YOUR-ORGANIZATION-ID"
+billing_account_id = "YOUR-BILLING-ACCOUNT-ID"
+
+state_bucket_name = "TFSTATE-BUCKET-NAME"
+
+region = "asia-south1"
+    
