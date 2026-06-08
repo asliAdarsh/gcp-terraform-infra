@@ -1,15 +1,12 @@
 # ======================================================================
 # Reusable Deploy App Workflow
 # ======================================================================
-# Shared pipeline for all Core and Spoke deployments.
-# Handles init → validate → plan → apply.
-#
 # Usage:
 #   jobs:
 #     deploy:
 #       uses: ./.github/workflows/deploy-app.yaml
 #       with:
-#         workload-path: Spoke/Clynz    # or "Core"
+#         workload-path: Spoke/Clynz
 #         environment: dev
 #       secrets: inherit
 # ======================================================================
@@ -42,7 +39,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Authenticate to GCP
-        id: auth
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
@@ -68,6 +64,7 @@ jobs:
         run: |
           cd Workload/${{ inputs.workload-path }}
           terraform plan \
+            -var-file=../../Deployment/common.tfvars \
             -var-file=../../Deployment/${{ inputs.workload-path }}/${{ inputs.environment }}.tfvars \
             -no-color \
             -out=tfplan
