@@ -1,0 +1,44 @@
+# ======================================================================
+# Clynz Team Pipeline
+# ======================================================================
+# Deploys Clynz team's projects and resources.
+# Triggered when their app folder or shared modules change.
+# ======================================================================
+
+name: Deploy Clynz
+
+on:
+  push:
+    branches: [dev, staging, prod]
+    paths:
+      - 'Deployment/Spoke/Clynz/**'
+      - 'Modules/service-project/**'
+      - 'Modules/compute-vm/**'
+      - 'Modules/cloud-sql/**'
+      - 'Modules/storage-bucket/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      - run: |
+          cd Deployment/Spoke/Clynz
+          terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+          terraform validate
+          terraform plan -var-file=${{ github.ref_name }}.tfvars -no-color -out=tfplan
+          terraform apply -auto-approve tfplan

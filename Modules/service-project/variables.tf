@@ -3,8 +3,14 @@
 # ======================================================================
 
 variable "project_name" {
-  description = "Short name for the project (e.g. backend-api, frontend-web)"
+  description = "Display name and resource prefix for the project"
   type        = string
+}
+
+variable "project_id" {
+  description = "Optional custom project ID (e.g. clynz-backend-dev). If unset, defaults to sb-{env}-{name}"
+  type        = string
+  default     = null
 }
 
 variable "environment" {
@@ -60,4 +66,16 @@ variable "create_bucket" {
   description = "If true, create a GCS storage bucket in the project"
   type        = bool
   default     = false
+}
+
+variable "vm_machine_type" {
+  description = "Machine type for the VM (if create_vm is true)"
+  type        = string
+  default     = "e2-micro"
+}
+
+variable "vm_image" {
+  description = "Boot disk image for the VM"
+  type        = string
+  default     = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
 }

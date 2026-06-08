@@ -1,12 +1,22 @@
-# Backend API — Variables
+# Clynz Team App — Variables
 
-variable "environment" {
-  description = "Environment: dev, staging, or prod"
+variable "team_name" {
+  description = "Team name (must match Core folder name, e.g. Clynz)"
   type        = string
 }
 
-variable "organization_id" {
-  description = "GCP Organization ID"
+variable "project_component" {
+  description = "Component name for display (e.g. backend, frontend)"
+  type        = string
+}
+
+variable "project_id" {
+  description = "Custom project ID (e.g. clynz-backend-dev)"
+  type        = string
+}
+
+variable "environment" {
+  description = "Environment: dev, staging, or prod"
   type        = string
 }
 
@@ -48,4 +58,16 @@ variable "create_bucket" {
   description = "Create a storage bucket"
   type        = bool
   default     = false
+}
+
+variable "vm_machine_type" {
+  description = "VM machine type"
+  type        = string
+  default     = "e2-micro"
+}
+
+variable "vm_image" {
+  description = "VM boot disk image"
+  type        = string
+  default     = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
 }

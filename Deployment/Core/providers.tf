@@ -1,4 +1,4 @@
-provider "google" { region = var.region }
+provider "google" { region = "asia-south1" }
 
 terraform {
   required_version = ">= 1.6"
@@ -7,6 +7,6 @@ terraform {
   }
   backend "gcs" {
     bucket = "PLACEHOLDER-BUCKET-NAME"
-    prefix = "apps/frontend-web"
+    prefix = "core"
   }
 }
