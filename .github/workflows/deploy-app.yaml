@@ -1,6 +1,8 @@
 # ======================================================================
 # Reusable Deploy App Workflow
 # ======================================================================
+# Handles init → validate → plan → (optionally apply).
+#
 # Usage:
 #   jobs:
 #     deploy:
@@ -8,14 +10,8 @@
 #       with:
 #         workload-path: Spoke/Clynz
 #         environment: dev
+#         run-apply: false    # plan only
 #       secrets: inherit
-#
-# Required Secrets:
-#   WIF_PROVIDER         — Workload Identity Federation provider
-#   WIF_SERVICE_ACCOUNT  — Service account to impersonate
-#   TF_STATE_BUCKET      — GCS bucket for Terraform state
-#   ORG_ID               — GCP Organization ID (numeric)
-#   BILLING_ACCOUNT      — GCP Billing Account ID
 # ======================================================================
 
 name: Deploy App
@@ -31,13 +27,18 @@ on:
         description: "Target environment (dev, staging, prod)"
         required: true
         type: string
+      run-apply:
+        description: "If true, run terraform apply after plan"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  terraform-deploy:
+  terraform:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
 
@@ -80,6 +81,7 @@ jobs:
             -out=tfplan
 
       - name: Terraform Apply
+        if: inputs.run-apply
         run: |
           cd Workload/${{ inputs.workload-path }}
           terraform apply -auto-approve tfplan
