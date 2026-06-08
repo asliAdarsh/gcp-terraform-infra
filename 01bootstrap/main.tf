@@ -18,7 +18,7 @@
 # service accounts that Terraform will impersonate in each stage.
 
 resource "google_project" "state_project" {
-  name            = "Bootstrap Infrastructure - State"
+  name            = "Bootstrap State Infrastructure"
   project_id      = "bootstrap-infra-state"
   org_id          = var.organization_id
   billing_account = var.billing_account_id
@@ -134,8 +134,8 @@ resource "google_service_account_iam_member" "sa_self_impersonation" {
 # Actions authenticate to GCP without static service account keys.
 
 resource "google_project" "cicd_project" {
-  name            = "Bootstrap CI/CD"
-  project_id      = "bootstrap-cicd"
+  name            = "Bootstrap CICD"
+  project_id      = "bootstrap-cicd-18792"
   org_id          = var.organization_id
   billing_account = var.billing_account_id
   labels = {
