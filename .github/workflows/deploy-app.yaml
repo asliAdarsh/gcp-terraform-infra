@@ -1,18 +1,6 @@
 # ======================================================================
 # Reusable Deploy App Workflow
 # ======================================================================
-# Handles init → validate → plan → (optionally apply).
-#
-# Usage:
-#   jobs:
-#     deploy:
-#       uses: ./.github/workflows/deploy-app.yaml
-#       with:
-#         workload-path: Spoke/Clynz
-#         environment: dev
-#         run-apply: false    # plan only
-#       secrets: inherit
-# ======================================================================
 
 name: Deploy App
 
@@ -57,26 +45,18 @@ jobs:
         with:
           terraform_version: 1.8.0
 
-      # Force Terraform to impersonate the WIF service account for ALL operations
-      # including GCS backend access (not just the google provider)
       - name: Terraform Init
-        env:
-          GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: ${{ secrets.WIF_SERVICE_ACCOUNT }}
         run: |
           cd Workload/${{ inputs.workload-path }}
           terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
 
       - name: Terraform Validate
-        env:
-          GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: ${{ secrets.WIF_SERVICE_ACCOUNT }}
         run: |
           cd Workload/${{ inputs.workload-path }}
           terraform validate
 
       - name: Terraform Plan
         id: plan
-        env:
-          GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: ${{ secrets.WIF_SERVICE_ACCOUNT }}
         run: |
           cd Workload/${{ inputs.workload-path }}
           terraform plan \
@@ -90,8 +70,6 @@ jobs:
 
       - name: Terraform Apply
         if: inputs.run-apply
-        env:
-          GOOGLE_IMPERSONATE_SERVICE_ACCOUNT: ${{ secrets.WIF_SERVICE_ACCOUNT }}
         run: |
           cd Workload/${{ inputs.workload-path }}
           terraform apply -auto-approve tfplan
