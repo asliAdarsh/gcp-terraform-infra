@@ -1,7 +1,17 @@
 # ======================================================================
 # Reusable Deploy App Workflow
 # ======================================================================
-# Called by per-app workflow files. Handles init → validate → plan → apply.
+# Shared pipeline for all Core and Spoke deployments.
+# Handles init → validate → plan → apply.
+#
+# Usage:
+#   jobs:
+#     deploy:
+#       uses: ./.github/workflows/deploy-app.yaml
+#       with:
+#         workload-path: Spoke/Clynz    # or "Core"
+#         environment: dev
+#       secrets: inherit
 # ======================================================================
 
 name: Deploy App
@@ -9,8 +19,8 @@ name: Deploy App
 on:
   workflow_call:
     inputs:
-      app-name:
-        description: "App directory name (e.g. backend-api)"
+      workload-path:
+        description: "Path under Workload/ (e.g. Core, Spoke/Clynz)"
         required: true
         type: string
       environment:
@@ -45,24 +55,24 @@ jobs:
 
       - name: Terraform Init
         run: |
-          cd apps/${{ inputs.app-name }}
+          cd Workload/${{ inputs.workload-path }}
           terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
 
       - name: Terraform Validate
         run: |
-          cd apps/${{ inputs.app-name }}
+          cd Workload/${{ inputs.workload-path }}
           terraform validate
 
       - name: Terraform Plan
         id: plan
         run: |
-          cd apps/${{ inputs.app-name }}
+          cd Workload/${{ inputs.workload-path }}
           terraform plan \
-            -var-file=${{ inputs.environment }}.tfvars \
+            -var-file=../../Deployment/${{ inputs.workload-path }}/${{ inputs.environment }}.tfvars \
             -no-color \
             -out=tfplan
 
       - name: Terraform Apply
         run: |
-          cd apps/${{ inputs.app-name }}
+          cd Workload/${{ inputs.workload-path }}
           terraform apply -auto-approve tfplan

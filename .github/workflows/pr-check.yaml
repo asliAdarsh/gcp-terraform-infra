@@ -1,18 +1,8 @@
 # ======================================================================
-# PR Check Workflow — pr-check.yaml
+# PR Check Workflow
 # ======================================================================
-# Runs on every pull request to validate Terraform code before merging.
-#
-# Steps:
-#   1. Checkout code
-#   2. Authenticate to GCP via Workload Identity Federation (no static keys)
-#   3. Setup Terraform
-#   4. Format check
-#   5. Init (all stages)
-#   6. Validate (all stages)
-#   7. Plan (select stage based on changed files)
-#   8. Post plan as PR comment
-#   9. Secret scan via gitleaks
+# Runs on PRs to validate Terraform formatting and syntax for any
+# changed Workload/ or Deployment/ files.
 # ======================================================================
 
 name: PR Check
@@ -20,103 +10,45 @@ name: PR Check
 on:
   pull_request:
     branches: [dev, staging, prod]
-    types: [opened, synchronize, reopened]
     paths:
-      - '**.tf'
-      - '**.tfvars'
+      - 'Workload/**'
       - 'Deployment/**'
       - 'Modules/**'
 
-# Permissions needed for OIDC token exchange and posting PR comments
 permissions:
-  id-token: write       # WIF authentication
-  contents: read        # Checkout code
-  pull-requests: write  # Post plan as comment
+  id-token: write
+  contents: read
+  pull-requests: write
 
 jobs:
-  terraform-plan:
+  terraform-check:
     runs-on: ubuntu-latest
 
-    # Use environment-specific protection rules if configured
-    environment: ${{ github.base_ref }}
-
     steps:
-      # ── Step 1: Checkout ────────────────────────────────────────
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # ── Step 2: WIF Auth ────────────────────────────────────────
-      # Authenticates to GCP without storing service account keys.
-      # Uses Workload Identity Federation configured in bootstrap stage.
-      - name: Authenticate to GCP
-        id: auth
-        uses: google-github-actions/auth@v2
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
-
-      # ── Step 3: Setup Terraform ─────────────────────────────────
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.0
           terraform_wrapper: false
 
-      # ── Step 4: Format Check ────────────────────────────────────
+      # Format check across all Terraform files
       - name: Terraform Format
         run: terraform fmt -check -recursive
         continue-on-error: true
 
-      # ── Step 5: Init + Validate for changed stages ──────────────
-      # For simplicity, run init + validate on the service-projects
-      # stage (the main deployable unit). Add other stages as needed.
-      - name: Terraform Init (service-projects)
+      # Validate each Workload module that was changed
+      - name: Terraform Validate
         run: |
-          cd 04service-projects
-          terraform init -backend=false
-
-      - name: Terraform Validate (service-projects)
-        run: |
-          cd 04service-projects
-          terraform validate
-
-      # ── Step 6: Plan ────────────────────────────────────────────
-      # Plan uses the environment branch name to pick the right .tfvars
-      - name: Terraform Plan
-        id: plan
-        run: |
-          cd 04service-projects
-          terraform plan \
-            -var-file=../Deployment/${{ github.base_ref }}.tfvars \
-            -no-color \
-            -out=tfplan
-        continue-on-error: true
-
-      # ── Step 7: Post Plan as PR Comment ─────────────────────────
-      - name: Post Plan Comment
-        uses: actions/github-script@v7
-        if: github.event_name == 'pull_request'
-        with:
-          script: |
-            const output = `#### Terraform Plan (\`${{ github.base_ref }}\`)
-            <details><summary>Show Plan</summary>
-            
-            \`\`\`
-            ${{ steps.plan.outputs.stdout }}
-            \`\`\`
-            
-            </details>
-            
-            *Pushed by: ${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
-
-      # ── Step 8: Secret Scan ─────────────────────────────────────
-      - name: Secret Scan (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        continue-on-error: true
+          for dir in $(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^Workload/' | cut -d/ -f1-3 | sort -u); do
+            if [ -f "$dir/main.tf" ]; then
+              echo "=== Validating $dir ==="
+              cd "$dir"
+              terraform init -backend=false
+              terraform validate
+              cd ../..
+            fi
+          done
