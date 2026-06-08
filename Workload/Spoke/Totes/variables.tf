@@ -1,9 +1,7 @@
-# ======================================================================
-# {TEAM} App — Variables — TEMPLATE
-# ======================================================================
+# Totes Team — Variables
 
 variable "team_name" {
-  description = "Your team name (must match Core folder, e.g. Clynz)"
+  description = "Your team name (must match Core folder)"
   type        = string
 }
 
@@ -22,7 +20,6 @@ variable "environment" {
   type        = string
 }
 
-# ── Shared values (passed via CI/CD secrets or local vars) ────────
 variable "billing_account_id" {
   type = string
 }
@@ -36,7 +33,6 @@ variable "region" {
   default = "asia-south1"
 }
 
-# ── Optional flags ────────────────────────────────────────────────
 variable "apis" {
   type    = list(string)
   default = ["compute.googleapis.com"]
