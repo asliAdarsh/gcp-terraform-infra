@@ -1,0 +1,81 @@
+# ======================================================================
+# Apply Workflow — apply.yaml
+# ======================================================================
+# Runs on push to dev/staging/prod branches (i.e., after a PR is merged).
+# Applies the Terraform plan with the matching environment .tfvars file.
+#
+# Branch → Environment mapping:
+#   push to dev     → terraform apply -var-file=../Deployment/dev.tfvars
+#   push to staging → terraform apply -var-file=../Deployment/staging.tfvars
+#   push to prod    → terraform apply -var-file=../Deployment/prod.tfvars
+# ======================================================================
+
+name: Terraform Apply
+
+on:
+  push:
+    branches: [dev, staging, prod]
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+      - 'Deployment/**'
+      - 'Modules/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+
+    # Environment with approval gate (configure in GitHub repo settings)
+    environment: ${{ github.ref_name }}
+
+    steps:
+      # ── Step 1: Checkout ────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Step 2: WIF Auth ────────────────────────────────────────
+      - name: Authenticate to GCP
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      # ── Step 3: Setup Terraform ─────────────────────────────────
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
+
+      # ── Step 4: Init ────────────────────────────────────────────
+      - name: Terraform Init
+        run: |
+          cd 04service-projects
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+
+      # ── Step 5: Validate ────────────────────────────────────────
+      - name: Terraform Validate
+        run: |
+          cd 04service-projects
+          terraform validate
+
+      # ── Step 6: Plan ────────────────────────────────────────────
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd 04service-projects
+          terraform plan \
+            -var-file=../Deployment/${{ github.ref_name }}.tfvars \
+            -no-color \
+            -out=tfplan
+
+      # ── Step 7: Apply ───────────────────────────────────────────
+      - name: Terraform Apply
+        run: |
+          cd 04service-projects
+          terraform apply -auto-approve tfplan

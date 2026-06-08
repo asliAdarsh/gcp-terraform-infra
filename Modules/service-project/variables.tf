@@ -43,3 +43,21 @@ variable "region" {
   type        = string
   default     = "asia-south1"
 }
+
+variable "create_vm" {
+  description = "If true, create a test VM instance in the project"
+  type        = bool
+  default     = false
+}
+
+variable "create_sql" {
+  description = "If true, create a Cloud SQL (PostgreSQL) instance in the project"
+  type        = bool
+  default     = false
+}
+
+variable "create_bucket" {
+  description = "If true, create a GCS storage bucket in the project"
+  type        = bool
+  default     = false
+}

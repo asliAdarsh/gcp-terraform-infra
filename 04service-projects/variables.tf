@@ -31,15 +31,23 @@ variable "region" {
 variable "service_projects" {
   description = <<-EOT
     List of service projects to create in this environment.
-    Each entry: { name, apis }
+    Each entry: { name, apis, create_vm, create_sql, create_bucket }
     Example:
     service_projects = [
-      { name = "backend-api", apis = ["compute.googleapis.com", "container.googleapis.com"] },
-      { name = "frontend-web", apis = ["compute.googleapis.com", "run.googleapis.com"] },
+      {
+        name        = "backend-api"
+        apis        = ["compute.googleapis.com"]
+        create_vm   = true
+        create_sql  = false
+        create_bucket = true
+      },
     ]
   EOT
   type = list(object({
-    name = string
-    apis = optional(list(string), ["compute.googleapis.com"])
+    name          = string
+    apis          = optional(list(string), ["compute.googleapis.com"])
+    create_vm     = optional(bool, false)
+    create_sql    = optional(bool, false)
+    create_bucket = optional(bool, false)
   }))
 }

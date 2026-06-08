@@ -60,4 +60,7 @@ module "service_project" {
   subnet_self_link       = local.subnet_self_link
   apis                   = each.value.apis
   region                 = var.region
+  create_vm              = each.value.create_vm
+  create_sql             = each.value.create_sql
+  create_bucket          = each.value.create_bucket
 }

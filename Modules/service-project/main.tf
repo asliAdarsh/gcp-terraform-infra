@@ -1,10 +1,13 @@
 # ======================================================================
 # Service Project Module — main.tf
 # ======================================================================
-# Creates a complete service project:
-#   1. GCP project under environment folder
-#   2. Required APIs enabled
-#   3. Shared VPC attachment to host project
+# Creates a complete service project with optional resources:
+#   - GCP project under environment folder
+#   - Required APIs enabled
+#   - Shared VPC attachment to host project
+#   - Optional: VM instance (compute-vm module)
+#   - Optional: Cloud SQL instance (cloud-sql module)
+#   - Optional: GCS storage bucket (storage-bucket module)
 # ======================================================================
 
 # ----------------------------------------------------------------------
@@ -41,12 +44,54 @@ resource "google_project_service" "api" {
 # ----------------------------------------------------------------------
 # SHARED VPC ATTACHMENT
 # ----------------------------------------------------------------------
-# Attach this project as a service project to the host VPC.
-# Once attached, resources in this project can use the host VPC's subnets.
-# Access to specific subnets can be controlled via subnet-level IAM.
 resource "google_compute_shared_vpc_service_project" "attachment" {
   host_project    = var.host_project_id
   service_project = google_project.service_project.project_id
 
   depends_on = [google_project_service.api]
+}
+
+# ----------------------------------------------------------------------
+# OPTIONAL: VM INSTANCE
+# ----------------------------------------------------------------------
+module "vm" {
+  count = var.create_vm ? 1 : 0
+
+  source = "../Modules/compute-vm"
+
+  project_id        = google_project.service_project.project_id
+  vm_name           = "${var.environment}-${var.project_name}-vm"
+  zone              = "${var.region}-a"
+  subnet_self_link  = var.subnet_self_link
+  machine_type      = "e2-micro"
+  tags              = ["iap-ssh", "${var.environment}"]
+}
+
+# ----------------------------------------------------------------------
+# OPTIONAL: CLOUD SQL (PostgreSQL)
+# ----------------------------------------------------------------------
+module "sql" {
+  count = var.create_sql ? 1 : 0
+
+  source = "../Modules/cloud-sql"
+
+  project_id  = google_project.service_project.project_id
+  sql_name    = "${var.environment}-${var.project_name}-sql"
+  region      = var.region
+  db_version  = "POSTGRES_15"
+  db_name     = "appdb"
+  db_user     = "appuser"
+}
+
+# ----------------------------------------------------------------------
+# OPTIONAL: STORAGE BUCKET
+# ----------------------------------------------------------------------
+module "bucket" {
+  count = var.create_bucket ? 1 : 0
+
+  source = "../Modules/storage-bucket"
+
+  project_id  = google_project.service_project.project_id
+  bucket_name = "sb-${var.environment}-${var.project_name}-data"
+  location    = var.region
 }
