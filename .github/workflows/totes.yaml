@@ -1,34 +1,28 @@
 # ======================================================================
-# {TEAM} Team Pipeline — TEMPLATE
-# ======================================================================
-# Copy this file to {team}.yaml and:
-#   1. Change {TEAM} to your team name (5 places)
-#   2. Add/remove module paths under both triggers
+# Totes Team Pipeline
 # ======================================================================
 
-name: Deploy {TEAM}
+name: Deploy Totes
 
 on:
   pull_request:
     branches: [dev, staging, prod]
     paths:
-      - 'Deployment/Spoke/{TEAM}/**'
-      - 'Workload/Spoke/{TEAM}/**'
+      - 'Deployment/Spoke/Totes/**'
+      - 'Workload/Spoke/Totes/**'
       - 'Modules/service-project/**'
       - 'Modules/compute-vm/**'
       - 'Modules/cloud-sql/**'
       - 'Modules/storage-bucket/**'
-      # - 'Modules/gke-cluster/**'  ← add new modules here
   push:
     branches: [dev, staging, prod]
-    paths: &team_paths
-      - 'Deployment/Spoke/{TEAM}/**'
-      - 'Workload/Spoke/{TEAM}/**'
+    paths:
+      - 'Deployment/Spoke/Totes/**'
+      - 'Workload/Spoke/Totes/**'
       - 'Modules/service-project/**'
       - 'Modules/compute-vm/**'
       - 'Modules/cloud-sql/**'
       - 'Modules/storage-bucket/**'
-      # - 'Modules/gke-cluster/**'
 
 permissions:
   id-token: write
@@ -38,7 +32,7 @@ jobs:
   deploy:
     uses: ./.github/workflows/deploy-app.yaml
     with:
-      workload-path: Spoke/{TEAM}
+      workload-path: Spoke/Totes
       environment: ${{ github.event_name == 'pull_request' && github.base_ref || github.ref_name }}
       run-apply: ${{ github.event_name == 'push' }}
     secrets: inherit
