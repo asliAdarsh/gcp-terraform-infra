@@ -1,24 +1,29 @@
 # ======================================================================
-# Clynz Team Pipeline
+# {TEAM} Team Pipeline — TEMPLATE
+# ======================================================================
+# Copy this file to {team}.yaml and:
+#   1. Change "Clynz" → your team name (3 places)
+#   2. Add/remove module paths as needed
 # ======================================================================
 
-name: Deploy Clynz
+name: Deploy {TEAM}
 
 on:
   push:
     branches: [dev, staging, prod]
     paths:
-      - 'Deployment/Spoke/Clynz/**'
-      - 'Workload/Spoke/Clynz/**'
+      - 'Deployment/Spoke/{TEAM}/**'
+      - 'Workload/Spoke/{TEAM}/**'
       - 'Modules/service-project/**'
       - 'Modules/compute-vm/**'
       - 'Modules/cloud-sql/**'
       - 'Modules/storage-bucket/**'
+      # - 'Modules/gke-cluster/**'   ← add new modules here
 
 jobs:
   deploy:
     uses: ./.github/workflows/deploy-app.yaml
     with:
-      workload-path: Spoke/Clynz
+      workload-path: Spoke/{TEAM}
       environment: ${{ github.ref_name }}
     secrets: inherit
