@@ -1,9 +1,6 @@
 # ======================================================================
 # Core Pipeline — manages team folders
 # ======================================================================
-# Triggered when Deployment/Core changes.
-# Deploys team sub-folders under the target environment folder.
-# ======================================================================
 
 name: Deploy Core
 
@@ -12,7 +9,7 @@ on:
     branches: [dev, staging, prod]
     paths:
       - 'Deployment/Core/**'
-      - 'Deployment/Core/*.tfvars'
+      - 'Workload/Core/**'
 
 permissions:
   id-token: write
@@ -34,8 +31,8 @@ jobs:
           terraform_version: 1.8.0
 
       - run: |
-          cd Deployment/Core
+          cd Workload/Core
           terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
           terraform validate
-          terraform plan -var-file=${{ github.ref_name }}.tfvars -no-color -out=tfplan
+          terraform plan -var-file=../../Deployment/Core/${{ github.ref_name }}.tfvars -no-color -out=tfplan
           terraform apply -auto-approve tfplan
