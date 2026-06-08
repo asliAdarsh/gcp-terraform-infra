@@ -50,12 +50,6 @@ variable "disk_size_gb" {
   default     = 20
 }
 
-variable "require_ssl" {
-  description = "Require SSL/TLS for all connections"
-  type        = bool
-  default     = true
-}
-
 variable "backup_enabled" {
   description = "Enable automated backups"
   type        = bool

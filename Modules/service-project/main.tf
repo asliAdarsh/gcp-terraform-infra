@@ -52,12 +52,25 @@ resource "google_compute_shared_vpc_service_project" "attachment" {
 }
 
 # ----------------------------------------------------------------------
+# WAIT FOR API PROPAGATION
+# ----------------------------------------------------------------------
+# Newly enabled APIs take ~30s to propagate. Without this wait,
+# resources like VMs fail with "Compute API not enabled yet".
+resource "time_sleep" "api_propagation" {
+  count = var.create_vm || var.create_sql ? 1 : 0
+
+  create_duration = "30s"
+
+  depends_on = [google_project_service.api]
+}
+
+# ----------------------------------------------------------------------
 # OPTIONAL: VM INSTANCE
 # ----------------------------------------------------------------------
 module "vm" {
   count = var.create_vm ? 1 : 0
 
-  source = "../Modules/compute-vm"
+  source = "../compute-vm"
 
   project_id        = google_project.service_project.project_id
   vm_name           = "${var.environment}-${var.project_name}-vm"
@@ -65,6 +78,8 @@ module "vm" {
   subnet_self_link  = var.subnet_self_link
   machine_type      = "e2-micro"
   tags              = ["iap-ssh", "${var.environment}"]
+
+  depends_on = [time_sleep.api_propagation[0]]
 }
 
 # ----------------------------------------------------------------------
@@ -73,7 +88,7 @@ module "vm" {
 module "sql" {
   count = var.create_sql ? 1 : 0
 
-  source = "../Modules/cloud-sql"
+  source = "../cloud-sql"
 
   project_id  = google_project.service_project.project_id
   sql_name    = "${var.environment}-${var.project_name}-sql"
@@ -81,6 +96,8 @@ module "sql" {
   db_version  = "POSTGRES_15"
   db_name     = "appdb"
   db_user     = "appuser"
+
+  depends_on = [time_sleep.api_propagation[0]]
 }
 
 # ----------------------------------------------------------------------
@@ -89,7 +106,7 @@ module "sql" {
 module "bucket" {
   count = var.create_bucket ? 1 : 0
 
-  source = "../Modules/storage-bucket"
+  source = "../storage-bucket"
 
   project_id  = google_project.service_project.project_id
   bucket_name = "sb-${var.environment}-${var.project_name}-data"

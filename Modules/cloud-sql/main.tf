@@ -5,7 +5,6 @@
 #   - Cloud SQL PostgreSQL instance (private IP, no public access)
 #   - Default database
 #   - Default user
-#   - Authorized network (optional, defaults to none)
 # ======================================================================
 
 # ----------------------------------------------------------------------
@@ -28,11 +27,7 @@ resource "google_sql_database_instance" "sql" {
 
     ip_configuration {
       # Private IP only — no public access
-      ipv4_enabled    = false
-      require_ssl     = var.require_ssl
-
-      # No authorized networks by default (use private IP only)
-      authorized_networks = []
+      ipv4_enabled = false
     }
 
     backup_configuration {
@@ -56,12 +51,6 @@ resource "google_sql_database_instance" "sql" {
       hour         = 3  # 3:00 AM
       update_track = "stable"
     }
-  }
-
-  labels = {
-    managed-by  = "terraform"
-    db-type     = "postgres"
-    environment = var.sql_name
   }
 }
 
