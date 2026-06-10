@@ -12,5 +12,3 @@ create_bucket = false
 
 vm_machine_type = "e2-micro"
 vm_image        = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
-
-# First Totes project with VM
