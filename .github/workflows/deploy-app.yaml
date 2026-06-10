@@ -1,18 +1,6 @@
 # ======================================================================
 # Reusable Deploy App Workflow
 # ======================================================================
-# Handles init → validate → plan → (optionally apply).
-#
-# Usage:
-#   jobs:
-#     deploy:
-#       uses: ./.github/workflows/deploy-app.yaml
-#       with:
-#         workload-path: Spoke/Clynz
-#         environment: dev
-#         run-apply: false    # plan only
-#       secrets: inherit
-# ======================================================================
 
 name: Deploy App
 
@@ -58,30 +46,28 @@ jobs:
           terraform_version: 1.8.0
 
       - name: Terraform Init
-        run: |
-          cd Workload/${{ inputs.workload-path }}
-          terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+        working-directory: Workload/${{ inputs.workload-path }}
+        run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
 
       - name: Terraform Validate
-        run: |
-          cd Workload/${{ inputs.workload-path }}
-          terraform validate
+        working-directory: Workload/${{ inputs.workload-path }}
+        run: terraform validate
 
       - name: Terraform Plan
         id: plan
+        working-directory: Workload/${{ inputs.workload-path }}
         run: |
-          cd Workload/${{ inputs.workload-path }}
           terraform plan \
             -var="organization_id=${{ secrets.ORG_ID }}" \
             -var="billing_account_id=${{ secrets.BILLING_ACCOUNT }}" \
             -var="state_bucket_name=${{ secrets.TF_STATE_BUCKET }}" \
+            -var="environment=${{ inputs.environment }}" \
             -var="region=asia-south1" \
-            -var-file=../../Deployment/${{ inputs.workload-path }}/${{ inputs.environment }}.tfvars \
+            -var-file=${{ github.workspace }}/Deployment/${{ inputs.workload-path }}/${{ inputs.environment }}.tfvars \
             -no-color \
             -out=tfplan
 
       - name: Terraform Apply
         if: inputs.run-apply
-        run: |
-          cd Workload/${{ inputs.workload-path }}
-          terraform apply -auto-approve tfplan
+        working-directory: Workload/${{ inputs.workload-path }}
+        run: terraform apply -auto-approve tfplan

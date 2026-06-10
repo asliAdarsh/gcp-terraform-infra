@@ -27,6 +27,10 @@ variable "billing_account_id" {
   type = string
 }
 
+variable "organization_id" {
+  type = string
+}
+
 variable "state_bucket_name" {
   type = string
 }

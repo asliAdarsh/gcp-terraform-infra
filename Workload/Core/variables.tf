@@ -19,3 +19,14 @@ variable "teams" {
   description = "List of team names to create folders for (e.g. ['Clynz', 'Alpha'])"
   type        = list(string)
 }
+
+# Core doesn't use these, but the CI/CD passes them to all workloads
+variable "billing_account_id" {
+  type    = string
+  default = null
+}
+
+variable "region" {
+  type    = string
+  default = null
+}
