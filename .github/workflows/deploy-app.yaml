@@ -61,6 +61,7 @@ jobs:
             -var="organization_id=${{ secrets.ORG_ID }}" \
             -var="billing_account_id=${{ secrets.BILLING_ACCOUNT }}" \
             -var="state_bucket_name=${{ secrets.TF_STATE_BUCKET }}" \
+            -var="environment=${{ inputs.environment }}" \
             -var="region=asia-south1" \
             -var-file=${{ github.workspace }}/Deployment/${{ inputs.workload-path }}/${{ inputs.environment }}.tfvars \
             -no-color \
