@@ -62,7 +62,14 @@ terraform apply -var-file=../../../Deployment/Spoke/{Team}/dev.tfvars
 **Required GitHub secrets:** `WIF_PROVIDER`, `WIF_SERVICE_ACCOUNT`, `TF_STATE_BUCKET`.
 
 ---
+## Author
 
-📜 **License**
+**Adarsh** — DevOps learner & practitioner
 
-This project is licensed under the MIT License — see the [LICENSE](../LICENSE) file for details.
+## 📜 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+*This is a personal learning repository. Feel free to explore and use it as a reference for your own DevOps journey!*
