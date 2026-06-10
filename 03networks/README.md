@@ -24,7 +24,7 @@ Bootstrap + Organization stages must be complete.
 ```bash
 cd 03networks
 cp terraform.tfvars.example terraform.tfvars
-terraform init -backend-config="bucket=terraform-state-asliadarsh-18792"
+terraform init -backend-config="bucket=YOUR_STATE_BUCKET"
 terraform plan
 terraform apply
 ```

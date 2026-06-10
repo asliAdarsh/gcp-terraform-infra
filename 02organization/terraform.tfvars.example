@@ -14,7 +14,7 @@
 organization_id    = "REPLACE_WITH_YOUR_ORG_ID"
 billing_account_id = "REPLACE_WITH_YOUR_BILLING_ACCOUNT_ID"
 
-state_bucket_name      = "terraform-state-asliadarsh-18792"
+state_bucket_name      = "YOUR_STATE_BUCKET"
 terraform_org_sa_email = "terraform-org@bootstrap-infra-state.iam.gserviceaccount.com"
 
 region = "asia-south1"

@@ -13,7 +13,7 @@ variable "billing_account_id" {
 }
 
 variable "state_bucket_name" {
-  description = "Name of the GCS bucket created in bootstrap (e.g. terraform-state-asliadarsh-18792)"
+  description = "Name of the GCS bucket created in bootstrap (e.g. YOUR_STATE_BUCKET)"
   type        = string
 }
 
